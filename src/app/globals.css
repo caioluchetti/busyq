@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+.leaflet-tooltip-custom {
+  background: rgba(0, 0, 0, 0.85) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.leaflet-tooltip-custom::before {
+  border-top-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.leaflet-container {
+  font-family: inherit !important;
+}
+
+@keyframes pulse-busy {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse-busy {
+  animation: pulse-busy 2s ease-in-out infinite;
+}
