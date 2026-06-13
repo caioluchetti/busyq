@@ -6,22 +6,20 @@ After=network.target
 [Service]
 Type=simple
 User=www-data
-WorkingDirectory=/opt/busyq
+WorkingDirectory=/var/www/busyq
 Environment=PORT=8081
 Environment=NODE_ENV=production
-ExecStart=/usr/bin/npx next start -p 8081 -H 0.0.0.0
-ExecStop=/bin/kill -TERM $MAINPID
+ExecStart=/usr/bin/node /var/www/busyq/server.js
 Restart=on-failure
 RestartSec=5
 StandardOutput=append:/var/log/busyq.log
 StandardError=append:/var/log/busyq.error.log
 
-# Security hardening
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=yes
-ReadWritePaths=/opt/busyq/.busyq-data
+ReadWritePaths=/var/www/busyq/.busyq-data
 
 [Install]
 WantedBy=multi-user.target

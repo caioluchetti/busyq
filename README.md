@@ -68,40 +68,31 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Quick Deploy
 
 ```bash
-# Full deploy: build + start on port 8081
+# Build + package to /var/www/busyq/
 ./deploy.sh deploy
 
-# Or step by step:
-./deploy.sh build    # Build the app
-./deploy.sh start    # Start on port 8081
-./deploy.sh status   # Check if running
-./deploy.sh logs     # Tail server logs
-./deploy.sh restart  # Stop + start
-./deploy.sh stop     # Stop server
+# Then on the HOST machine:
+cd /var/www/busyq
+PORT=8081 node server.js
 ```
 
 ### NPM Scripts
 
 ```bash
-npm run deploy          # Build + start interactive
-npm run deploy:build    # Build only
-npm run deploy:start    # Start in background on port 8081
-npm run deploy:stop     # Kill process on port 8081
-npm run deploy:restart  # Stop then start
+npm run deploy          # Build + package to /var/www/busyq/
+npm run deploy:build    # Build only (next build)
+npm run deploy:package  # Copy standalone server to /var/www/busyq/
 ```
 
-Set a custom port: `PORT=3000 ./deploy.sh deploy`
-
-### Systemd Service (Linux)
+### Systemd Service (on host)
 
 ```bash
 sudo cp deploy/busyq.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now busyq
-sudo systemctl status busyq
 ```
 
-### Nginx Reverse Proxy
+### Nginx Reverse Proxy (on host)
 
 ```bash
 sudo cp deploy/nginx.conf /etc/nginx/sites-available/busyq
@@ -109,7 +100,7 @@ sudo ln -s /etc/nginx/sites-available/busyq /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Nginx handles gzip, security headers, static asset caching, and proxies to Next.js on 8081.
+Nginx reverse-proxies `:80` → `127.0.0.1:8081` with gzip, caching, security headers.
 
 ## How the Heatmap Works
 

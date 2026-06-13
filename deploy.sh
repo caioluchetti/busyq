@@ -3,9 +3,8 @@ set -e
 
 APP_NAME="busyq"
 PORT="${PORT:-8081}"
-LOG_FILE="/var/log/${APP_NAME}.log"
-PID_FILE="/tmp/${APP_NAME}.pid"
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
+DEPLOY_DIR="/var/www/${APP_NAME}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -30,90 +29,53 @@ check_deps() {
 }
 
 build() {
-  log "Building ${BOLD}${APP_NAME}${NC}..."
+  log "Building ${BOLD}${APP_NAME}${NC} (standalone output)..."
   cd "$APP_DIR"
   npm run build
   log "Build complete."
 }
 
-start() {
-  if lsof -ti :"${PORT}" &>/dev/null; then
-    warn "Port ${PORT} is already in use. Stopping existing process..."
-    stop
-    sleep 1
-  fi
+package() {
+  log "Packaging standalone server to ${BOLD}${DEPLOY_DIR}${NC}..."
 
-  log "Starting ${BOLD}${APP_NAME}${NC} on port ${BOLD}${PORT}${NC}..."
-  cd "$APP_DIR"
+  rm -rf "$DEPLOY_DIR"
+  mkdir -p "$DEPLOY_DIR"
 
-  nohup npx next start -p "${PORT}" -H 0.0.0.0 > "$LOG_FILE" 2>&1 &
-  PID=$!
-  echo $PID > "$PID_FILE"
+  cp -r "$APP_DIR/.next/standalone/"* "$DEPLOY_DIR/"
+  mkdir -p "$DEPLOY_DIR/.next"
+  cp -r "$APP_DIR/.next/static" "$DEPLOY_DIR/.next/"
 
-  sleep 2
-  if kill -0 $PID 2>/dev/null; then
-    log "Started (PID: ${BOLD}${PID}${NC})"
-    log "Logs: ${BOLD}${LOG_FILE}${NC}"
-    log "URL:  ${BOLD}http://localhost:${PORT}${NC}"
-  else
-    err "Failed to start. Check logs: tail -f ${LOG_FILE}"
-    exit 1
-  fi
+  log "Packaged. Run on host:"
+  echo ""
+  echo -e "  ${BOLD}cd ${DEPLOY_DIR}${NC}"
+  echo -e "  ${BOLD}PORT=${PORT} node server.js${NC}"
+  echo ""
 }
 
-stop() {
-  if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE")
-    if kill -0 "$PID" 2>/dev/null; then
-      kill "$PID" 2>/dev/null
-      log "Stopped process ${PID}"
-    fi
-    rm -f "$PID_FILE"
-  fi
+deploy() {
+  check_deps
+  build
+  package
 
-  if lsof -ti :"${PORT}" &>/dev/null; then
-    kill -9 "$(lsof -ti :${PORT})" 2>/dev/null
-    log "Force-killed any remaining process on port ${PORT}"
-  fi
-}
-
-restart() {
-  stop
-  sleep 1
-  start
-}
-
-status() {
-  if lsof -ti :"${PORT}" &>/dev/null; then
-    PID=$(lsof -ti :"${PORT}")
-    log "Running on port ${PORT} (PID: ${PID})"
-  else
-    warn "Not running on port ${PORT}"
-  fi
-}
-
-show_logs() {
-  if [ -f "$LOG_FILE" ]; then
-    tail -f "$LOG_FILE"
-  else
-    warn "No log file at ${LOG_FILE}"
-  fi
+  echo -e "  ${BOLD}Port:${NC}  ${PORT}"
+  echo -e "  ${BOLD}URL:${NC}   http://localhost:${PORT}"
+  echo ""
 }
 
 usage() {
   echo ""
-  echo -e "  ${BOLD}BusyQ Deploy Script${NC}"
+  echo -e "  ${BOLD}BusyQ Deploy Pipeline${NC}"
   echo ""
   echo -e "  Usage: ${BOLD}./deploy.sh <command>${NC}"
   echo ""
   echo "  Commands:"
-  echo "    build     Build the production bundle (next build)"
-  echo "    start     Start the production server on port ${PORT}"
-  echo "    stop      Stop the production server"
-  echo "    restart   Stop + start"
-  echo "    deploy    Build + start (full deploy)"
-  echo "    status    Check if server is running"
-  echo "    logs      Tail server logs"
+  echo "    build     Build the app (next build)"
+  echo "    package   Copy standalone output to ${DEPLOY_DIR}"
+  echo "    deploy    Build + package (full pipeline)"
+  echo ""
+  echo "  After deploy, run on the HOST machine:"
+  echo "    cd ${DEPLOY_DIR}"
+  echo "    PORT=${PORT} node server.js"
   echo ""
   echo "  Environment:"
   echo "    PORT      Server port (default: 8081)"
@@ -122,11 +84,7 @@ usage() {
 
 case "${1:-}" in
   build)   check_deps; build ;;
-  start)   check_deps; build; start ;;
-  stop)    stop ;;
-  restart) restart ;;
-  deploy)  check_deps; build; start ;;
-  status)  status ;;
-  logs)    show_logs ;;
+  package) package ;;
+  deploy)  deploy ;;
   *)       usage ;;
 esac
