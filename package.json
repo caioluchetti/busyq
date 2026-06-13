@@ -5,8 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p ${PORT:-8081}",
+    "lint": "next lint",
+    "deploy": "npm run build && npm run start",
+    "deploy:build": "npm run build",
+    "deploy:start": "nohup npx next start -p ${PORT:-8081} > /var/log/busyq.log 2>&1 &",
+    "deploy:stop": "lsof -ti :${PORT:-8081} | xargs kill -9 2>/dev/null; echo 'stopped'",
+    "deploy:restart": "npm run deploy:stop && sleep 1 && npm run deploy:start"
   },
   "dependencies": {
     "next": "^14.2.0",

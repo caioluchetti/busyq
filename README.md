@@ -63,6 +63,54 @@ npm run build
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Deploying to Production (Port 8081)
+
+### Quick Deploy
+
+```bash
+# Full deploy: build + start on port 8081
+./deploy.sh deploy
+
+# Or step by step:
+./deploy.sh build    # Build the app
+./deploy.sh start    # Start on port 8081
+./deploy.sh status   # Check if running
+./deploy.sh logs     # Tail server logs
+./deploy.sh restart  # Stop + start
+./deploy.sh stop     # Stop server
+```
+
+### NPM Scripts
+
+```bash
+npm run deploy          # Build + start interactive
+npm run deploy:build    # Build only
+npm run deploy:start    # Start in background on port 8081
+npm run deploy:stop     # Kill process on port 8081
+npm run deploy:restart  # Stop then start
+```
+
+Set a custom port: `PORT=3000 ./deploy.sh deploy`
+
+### Systemd Service (Linux)
+
+```bash
+sudo cp deploy/busyq.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now busyq
+sudo systemctl status busyq
+```
+
+### Nginx Reverse Proxy
+
+```bash
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/busyq
+sudo ln -s /etc/nginx/sites-available/busyq /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Nginx handles gzip, security headers, static asset caching, and proxies to Next.js on 8081.
+
 ## How the Heatmap Works
 
 Places contribute weighted intensity points to the heatmap:
@@ -104,6 +152,11 @@ busyq/
 ├── public/           # Static assets + PWA manifest
 ├── src/              # Source code (see above)
 ├── supabase/         # Database migrations
+├── deploy/           # Deploy configs (nginx, systemd)
+│   ├── nginx.conf
+│   └── busyq.service
+├── deploy.sh         # Deploy script (build + start/stop/restart)
+├── .env.example      # Environment config template
 ├── package.json
 ├── tsconfig.json
 ├── next.config.mjs

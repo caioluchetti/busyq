@@ -1,0 +1,27 @@
+[Unit]
+Description=BusyQ - Real-time Crowd Heatmap App
+Documentation=https://github.com/caioluchetti/busyq
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/busyq
+Environment=PORT=8081
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/npx next start -p 8081
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/busyq.log
+StandardError=append:/var/log/busyq.error.log
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/busyq/.busyq-data
+
+[Install]
+WantedBy=multi-user.target
