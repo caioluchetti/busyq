@@ -5,7 +5,7 @@
 # Safe: only listens on port 8081, won't affect your existing port 80/443 sites.
 set -e
 
-echo "=== BusyQ Nginx Setup (port 8081) ==="
+echo "=== BusyQ Nginx Setup (port 8082) ==="
 
 # Copy nginx config from shared volume
 echo "[1/2] Installing nginx config..."
@@ -18,8 +18,8 @@ sudo nginx -t && sudo nginx -s reload
 
 echo ""
 echo "=== Done ==="
-echo "BusyQ:  http://localhost:8081 (or http://<your-ip>:8081)"
+echo "BusyQ:  http://localhost:8082 (or http://<your-ip>:8082)"
 echo ""
-echo "Note: only listens on port 8081 — your other sites on 80/443 are untouched."
+echo "Note: only listens on port 8082 — your other sites on 80/443 are untouched."
 echo ""
 echo "Revert: sudo rm /etc/nginx/sites-enabled/busyq && sudo nginx -s reload"
