@@ -2,7 +2,7 @@
 set -e
 
 APP_NAME="busyq"
-PORT="${PORT:-8081}"
+PORT="${PORT:-3000}"
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 DEPLOY_DIR="/var/www/${APP_NAME}"
 
@@ -57,8 +57,9 @@ deploy() {
   build
   package
 
-  echo -e "  ${BOLD}Port:${NC}  ${PORT}"
-  echo -e "  ${BOLD}URL:${NC}   http://localhost:${PORT}"
+  echo -e "  ${BOLD}Internal port:${NC} ${PORT} (Node server)"
+  echo -e "  ${BOLD}Public port:${NC}  8081 (nginx)"
+  echo -e "  ${BOLD}URL:${NC}         http://localhost:8081"
   echo ""
 }
 
@@ -73,9 +74,17 @@ usage() {
   echo "    package   Copy standalone output to ${DEPLOY_DIR}"
   echo "    deploy    Build + package (full pipeline)"
   echo ""
-  echo "  After deploy, run on the HOST machine:"
-  echo "    cd ${DEPLOY_DIR}"
-  echo "    PORT=${PORT} node server.js"
+    echo "  After deploy, on the HOST machine:"
+    echo ""
+    echo "    # 1. Start the app (internal port 3000):"
+    echo "    cd ${DEPLOY_DIR} && PORT=3000 node server.js &"
+    echo ""
+    echo "    # 2. Configure nginx to serve on port 8081:"
+    echo "    sudo cp ${APP_DIR}/deploy/nginx.conf /etc/nginx/sites-available/busyq"
+    echo "    sudo ln -sf /etc/nginx/sites-available/busyq /etc/nginx/sites-enabled/"
+    echo "    sudo nginx -t && sudo systemctl reload nginx"
+    echo ""
+    echo "    # 3. Open http://localhost:8081"
   echo ""
   echo "  Environment:"
   echo "    PORT      Server port (default: 8081)"

@@ -65,42 +65,27 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Deploying to Production (Port 8081)
 
-### Quick Deploy
+### Quick Deploy (all-in-one)
 
 ```bash
-# Build + package to /var/www/busyq/
+# 1. Build + package (in container / dev machine)
 ./deploy.sh deploy
 
-# Then on the HOST machine:
-cd /var/www/busyq
-PORT=8081 node server.js
+# 2. On the HOST — one command sets up everything
+sudo bash /home/Apps/busyq/deploy/setup-host.sh
 ```
 
-### NPM Scripts
+Open **http://localhost:8081**.
 
-```bash
-npm run deploy          # Build + package to /var/www/busyq/
-npm run deploy:build    # Build only (next build)
-npm run deploy:package  # Copy standalone server to /var/www/busyq/
+### How it works
+
+```
+Browser :8081  →  nginx (port 8081)  →  node server.js (port 3000)
 ```
 
-### Systemd Service (on host)
-
-```bash
-sudo cp deploy/busyq.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now busyq
-```
-
-### Nginx Reverse Proxy (on host)
-
-```bash
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/busyq
-sudo ln -s /etc/nginx/sites-available/busyq /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-Nginx reverse-proxies `:80` → `127.0.0.1:8081` with gzip, caching, security headers.
+- `deploy.sh deploy` — builds Next.js standalone output to `/var/www/busyq/`
+- `setup-host.sh` — starts `node server.js` on `:3000` + configures nginx on `:8081`
+- nginx proxies `:8081` → `:3000` with gzip, caching, security headers
 
 ## How the Heatmap Works
 

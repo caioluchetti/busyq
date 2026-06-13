@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p ${PORT:-8081} -H 0.0.0.0",
+    "start": "next start -p ${PORT:-3000} -H 0.0.0.0",
     "lint": "next lint",
     "deploy": "npm run build && ./deploy.sh deploy",
     "deploy:build": "npm run build",
