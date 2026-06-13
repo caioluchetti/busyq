@@ -46,7 +46,7 @@ start() {
   log "Starting ${BOLD}${APP_NAME}${NC} on port ${BOLD}${PORT}${NC}..."
   cd "$APP_DIR"
 
-  nohup npx next start -p "${PORT}" > "$LOG_FILE" 2>&1 &
+  nohup npx next start -p "${PORT}" -H 0.0.0.0 > "$LOG_FILE" 2>&1 &
   PID=$!
   echo $PID > "$PID_FILE"
 

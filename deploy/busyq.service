@@ -9,7 +9,7 @@ User=www-data
 WorkingDirectory=/opt/busyq
 Environment=PORT=8081
 Environment=NODE_ENV=production
-ExecStart=/usr/bin/npx next start -p 8081
+ExecStart=/usr/bin/npx next start -p 8081 -H 0.0.0.0
 ExecStop=/bin/kill -TERM $MAINPID
 Restart=on-failure
 RestartSec=5
