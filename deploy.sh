@@ -41,9 +41,8 @@ package() {
   rm -rf "$DEPLOY_DIR"
   mkdir -p "$DEPLOY_DIR"
 
-  cp -r "$APP_DIR/.next/standalone/"* "$DEPLOY_DIR/"
-  mkdir -p "$DEPLOY_DIR/.next"
-  cp -r "$APP_DIR/.next/static" "$DEPLOY_DIR/.next/"
+  cp -a "$APP_DIR/.next/standalone/." "$DEPLOY_DIR/"
+  cp -r "$APP_DIR/.next/static" "$DEPLOY_DIR/.next/static"
 
   log "Packaged. Run on host:"
   echo ""
